@@ -5,43 +5,44 @@ import {
   TouchableOpacity,
   Pressable,
   StyleSheet,
-  ActivityIndicator,
 } from "react-native";
 import React, { useState } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
-import { AuthContext } from "../context/AuthProvider";
+import { AuthContext } from "../../context/AuthProvider";
+import Toast from "react-native-toast-message";
 
 const Signin = () => {
   const router = useRouter();
-  const { login } = React.useContext(AuthContext);
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { register } = React.useContext(AuthContext);
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = async () => {
-    if (!email || !password) {
-      Toast.show({
-        type: "error",
-        text1: "Validation Error",
-        text2: "Please enter both email and password.",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      await login(email, password);
-    } catch (error) {
-    } finally {
-      setIsLoading(false);
-    }
+  const HandleRegister = () => {
+    register(username, email, password);
+    Toast.show({
+      type: "success",
+      text1: "Registration Successful",
+      text2: "You are now registered",
+    });
   };
-
   return (
     <View style={styles.container}>
-      <Text style={styles.headerText}>Sign In</Text>
+      <Text style={styles.headerText}>Sign Up</Text>
+
+      <View style={styles.inputContainer}>
+        <Text style={styles.subtitle}>Username</Text>
+        <TextInput
+          placeholder="Username"
+          value={username}
+          onChangeText={(text) => setUsername(text)}
+          autoCapitalize="none"
+          keyboardType="default"
+          style={styles.input}
+        />
+      </View>
 
       <View style={styles.inputContainer}>
         <Text style={styles.subtitle}>Email</Text>
@@ -52,8 +53,6 @@ const Signin = () => {
           autoCapitalize="none"
           keyboardType="email-address"
           style={styles.input}
-          accessible={true}
-          accessibilityLabel="Email Input"
         />
       </View>
 
@@ -67,16 +66,8 @@ const Signin = () => {
             secureTextEntry={!showPassword}
             autoCapitalize="none"
             style={styles.inputPassword}
-            accessible={true}
-            accessibilityLabel="Password Input"
           />
-          <TouchableOpacity
-            onPress={() => setShowPassword(!showPassword)}
-            accessible={true}
-            accessibilityLabel={
-              showPassword ? "Hide Password" : "Show Password"
-            }
-          >
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
             <Ionicons
               name={showPassword ? "eye" : "eye-off"}
               size={24}
@@ -86,20 +77,12 @@ const Signin = () => {
         </View>
       </View>
 
-      <Pressable
-        style={styles.button}
-        onPress={handleLogin}
-        disabled={isLoading}
-      >
-        {isLoading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.buttonText}>Log In</Text>
-        )}
+      <Pressable style={styles.button} onPress={HandleRegister}>
+        <Text style={styles.buttonText}>Sign Up</Text>
       </Pressable>
 
-      <Pressable onPress={() => router.push("/signup/")}>
-        <Text style={styles.linkText}>Create an account</Text>
+      <Pressable onPress={() => router.push("/singin")}>
+        <Text style={styles.linkText}>Already have an account? Login</Text>
       </Pressable>
     </View>
   );
@@ -110,18 +93,16 @@ export default Signin;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: "column",
     paddingHorizontal: 24,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#F5F5F5",
-    paddingTop: 100,
   },
   headerText: {
     fontSize: 28,
     fontWeight: "bold",
     color: "#333",
-    marginBottom: 32,
+    marginBottom: 60,
   },
   inputContainer: {
     width: "100%",
@@ -130,20 +111,20 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 18,
     color: "#555",
-    marginBottom: 8,
+    marginBottom: 9,
     fontWeight: "600",
   },
   passwordContainer: {
     flexDirection: "row",
     alignItems: "center",
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: "#ccc",
-    borderRadius: 10,
+    borderRadius: 18,
     paddingHorizontal: 12,
     backgroundColor: "#FFF",
   },
   input: {
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: "#ccc",
     borderRadius: 10,
     paddingVertical: 12,
@@ -173,7 +154,7 @@ const styles = StyleSheet.create({
   },
   linkText: {
     color: "#007AFF",
-    marginTop: 16,
+    marginTop: 18,
     fontSize: 16,
     fontWeight: "600",
     textAlign: "center",

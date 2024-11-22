@@ -1,66 +1,88 @@
-import { View, Text, StyleSheet, Image, ScrollView } from "react-native";
 import React from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  ScrollView,
+  Pressable,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import { Pressable } from "react-native";
 import { useRouter } from "expo-router";
-import { AuthContext, AuthProvider } from "../context/AuthProvider";
+import { AuthContext } from "../context/AuthProvider";
 
 const Settings = () => {
   const router = useRouter();
-  const { user } = React.useContext(AuthContext);
-  const { emails } = React.useContext(AuthContext);
-  const { usernames } = React.useContext(AuthContext);
-  const { logout } = React.useContext(AuthContext);
+  const { emails, logout } = React.useContext(AuthContext);
+
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
         <Image
           source={require("@/assets/images/icon.png")}
           style={styles.headerImage}
         />
-        <Text style={styles.headerText}>{emails}</Text>
+        <Text style={styles.headerText}>Welcome, {emails || "User"}</Text>
       </View>
 
+      {/* Main Content */}
       <ScrollView>
         <View style={styles.items}>
+          {/* Account Section */}
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionHeaderText}>Account</Text>
+          </View>
           <View style={styles.item}>
             <Ionicons
               name="person-outline"
               size={24}
-              color="black"
+              color="#4CAF50"
               style={styles.icon}
             />
             <Pressable
-              onPress={() => router.push("/components/Settings/Pages")}
+              onPress={() => router.push("/components/Settings/EditProfile")}
             >
               <Text style={styles.itemText}>Edit Profile</Text>
             </Pressable>
           </View>
+          <View style={styles.item}>
+            <Ionicons
+              name="lock-closed-outline"
+              size={24}
+              color="#FF5722"
+              style={styles.icon}
+            />
+            <Pressable
+              onPress={() => router.push("/components/Settings/UpdatePassword")}
+            >
+              <Text style={styles.itemText}>Update Password</Text>
+            </Pressable>
+          </View>
 
+          {/* Customer Care Section */}
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionHeaderText}>Customer Care</Text>
           </View>
-
           <View style={styles.item}>
             <Ionicons
               name="call-outline"
               size={24}
-              color="black"
+              color="#2196F3"
               style={styles.icon}
             />
             <Pressable
-              onPress={() => router.push("/components/Settings/Contact")}
+              onPress={() => router.push("/components/Settings/ContactUs")}
             >
               <Text style={styles.itemText}>Contact Us</Text>
             </Pressable>
           </View>
-
           <View style={styles.item}>
             <Ionicons
               name="chatbubbles-outline"
               size={24}
-              color="black"
+              color="#9C27B0"
               style={styles.icon}
             />
             <Pressable
@@ -70,43 +92,46 @@ const Settings = () => {
             </Pressable>
           </View>
 
+          {/* Legal Section */}
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionHeaderText}>Legal</Text>
           </View>
-
           <View style={styles.item}>
+            <Ionicons
+              name="document-text-outline"
+              size={24}
+              color="#FFC107"
+              style={styles.icon}
+            />
             <Pressable
-              onPress={() => router.push("/components/Settings/terms")}
+              onPress={() => router.push("/components/Settings/Terms")}
             >
-              <Ionicons
-                name="document-text-outline"
-                size={24}
-                color="black"
-                style={styles.icon}
-              />
               <Text style={styles.itemText}>Terms and Conditions</Text>
             </Pressable>
           </View>
-
           <View style={styles.item}>
+            <Ionicons
+              name="shield-checkmark-outline"
+              size={24}
+              color="#009688"
+              style={styles.icon}
+            />
             <Pressable
               onPress={() => router.push("/components/Settings/Policies")}
             >
-              <Ionicons
-                name="shield-checkmark-outline"
-                size={24}
-                color="black"
-                style={styles.icon}
-              />
               <Text style={styles.itemText}>Policies</Text>
             </Pressable>
           </View>
 
+          {/* Logout */}
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionHeaderText}>Other</Text>
+          </View>
           <View style={styles.item}>
             <Ionicons
               name="log-out-outline"
               size={24}
-              color="black"
+              color="#E91E63"
               style={styles.icon}
             />
             <Pressable onPress={logout}>
@@ -124,12 +149,12 @@ export default Settings;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f4f4f4",
+    backgroundColor: "#f9f9f9",
   },
   header: {
     alignItems: "center",
-    marginVertical: 30,
-    marginTop: 5,
+    paddingVertical: 20,
+    backgroundColor: "#4CAF50",
   },
   headerImage: {
     width: 100,
@@ -138,31 +163,34 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   headerText: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "bold",
-    color: "#333",
+    color: "#FFF",
   },
   items: {
-    paddingHorizontal: 30,
+    paddingHorizontal: 20,
+    marginTop: 10,
   },
   sectionHeader: {
-    marginTop: 20,
-    paddingVertical: 12,
+    marginVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+    paddingBottom: 5,
   },
   sectionHeaderText: {
     fontSize: 18,
-    fontWeight: "700",
-    color: "#666",
+    fontWeight: "600",
+    color: "#333",
   },
   item: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 15,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
+    borderBottomColor: "#EEE",
   },
   icon: {
-    marginRight: 12,
+    marginRight: 15,
   },
   itemText: {
     fontSize: 16,

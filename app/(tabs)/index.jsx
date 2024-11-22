@@ -1,92 +1,132 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Image, StyleSheet, ScrollView, Pressable } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import axios from 'axios';
-import { useRouter } from 'expo-router';
+import React, { useState, useEffect, useContext } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  Image,
+  StyleSheet,
+  ScrollView,
+  Pressable,
+  FlatList,
+  Dimensions,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import axios from "axios";
+import { useRouter } from "expo-router";
+import { CartContext } from "../context/CartProvode";
+
+const { width } = Dimensions.get("window");
 
 export default function Index() {
-  const [data, setData] = useState([]);
-  const [product, setProduct] = useState([]);
-  const [searchQuery, setSearchQuery] = useState(''); 
+  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const { addToCart } = useContext(CartContext);
+  const router = useRouter();
 
-  
   useEffect(() => {
+    // Fetch Categories
     axios
-      .get('https://backend.nepalgadgetstore.com/category')
-      .then((response) => {
-        setData(response.data); 
-      })
-      .catch((error) => {
-        console.error('Error fetching category data:', error);
-      });
+      .get("https://backend.nepalgadgetstore.com/category")
+      .then((response) => setCategories(response.data))
+      .catch((error) => console.error("Error fetching category data:", error));
   }, []);
 
   useEffect(() => {
+    // Fetch Products
     axios
-      .get('https://backend.nepalgadgetstore.com/product/')
-      .then((response) => {
-        setProduct(response.data.results); 
-      })
-      .catch((error) => {
-        console.error('Error fetching product data:', error);
-      });
+      .get("https://backend.nepalgadgetstore.com/product/")
+      .then((response) => setProducts(response.data.results))
+      .catch((error) => console.error("Error fetching product data:", error));
   }, []);
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
       router.push({
-        pathname: '/search/[query]', 
+        pathname: "/search/[query]",
         params: { query: searchQuery },
       });
     } else {
-      alert('Please enter a product name to search.');
+      alert("Please enter a product name to search.");
     }
   };
 
-  const router = useRouter();
+  // Slider Render Item
+  const renderSliderItem = ({ item }) => (
+    <View style={styles.sliderItem}>
+      <Image source={{ uri: item.product_img }} style={styles.sliderImage} />
+      <Text style={styles.sliderTitle}>{item.description}</Text>
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.wrapper}>
-      
       <View style={styles.container}>
         <TextInput
           placeholder="Search Products"
           style={styles.input}
           value={searchQuery}
-          onChangeText={(text) => setSearchQuery(text)}
-          onSubmitEditing={handleSearch} 
+          onChangeText={setSearchQuery}
+          onSubmitEditing={handleSearch}
         />
       </View>
+
       <ScrollView>
+        {/* Slider Section */}
+        <View style={styles.sliderContainer}>
+          <Text style={styles.sectionHeader}>Featured Products</Text>
+          <FlatList
+            data={products.slice(0, 5)} 
+            renderItem={renderSliderItem}
+            keyExtractor={(item) => item.id.toString()}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+          />
+        </View>
+
+        {/* Category Section */}
         <View style={styles.container}>
-          <Text style={styles.headerText}>All Categories</Text>
+          <Text style={styles.sectionHeader}>Categories</Text>
           <View style={styles.categoryContainer}>
-            {data.map((item) => (
+            {categories.map((category) => (
               <Pressable
-                style={styles.category}
-                key={item.id}
-                onPress={() => router.push("/components/pages/category1")}
+                key={category.id}
+                style={styles.categoryCard}
+                onPress={() => router.push(`/SingleCategory/${category.id}`)}
               >
-                <Text style={styles.categoryText}>{item.category_name}</Text>
+                <Image
+                  source={{
+                    uri: `https://backend.nepalgadgetstore.com/${category.category_img}`,
+                  }}
+                  style={styles.categoryImage}
+                />
+                <Text style={styles.categoryTitle}>
+                  {category.category_name}
+                </Text>
               </Pressable>
             ))}
           </View>
         </View>
 
-      
+        {/* Products Section */}
         <View style={styles.container}>
-          <Text style={styles.headerText}>Featured Products</Text>
+          <Text style={styles.sectionHeader}>All Products</Text>
           <View style={styles.productContainer}>
-            {product.map((item) => (
-              <Pressable style={styles.product} key={item.id}>
+            {products.map((item) => (
+              <View key={item.id} style={styles.product}>
                 <Image
-                  source={{ uri: `${item.product_img}` }}
+                  source={{ uri: item.product_img }}
                   style={styles.productImage}
                 />
-                <Text style={styles.ProductMainTitle}>{item.description}</Text>
+                <Text style={styles.productTitle}>{item.description}</Text>
                 <Text>Price: ${item.price}</Text>
-                <Text>Stock: {item.stock}</Text>
-              </Pressable>
+                <Pressable
+                  style={styles.addButton}
+                  onPress={() => addToCart(item)}
+                >
+                  <Text style={styles.addButtonText}>Add to Cart</Text>
+                </Pressable>
+              </View>
             ))}
           </View>
         </View>
@@ -96,87 +136,111 @@ export default function Index() {
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    backgroundColor: '#FEF3E2',
-    marginBottom: 50,
-    height: '100%',
-  },
-  container: {
-    width: '90%',
-    marginHorizontal: '5%',
-    marginVertical: 13,
-  },
+  wrapper: { backgroundColor: "#FEF3E2", height: "100%" },
+  container: { width: "90%", marginHorizontal: "5%", marginVertical: 15 },
   input: {
-    borderWidth: 2,
-    borderColor: '#ccc',
-    borderRadius: 10,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    backgroundColor: '#FFF',
+    borderWidth: 1,
+    borderColor: "#DDD",
+    borderRadius: 8,
+    padding: 12,
+    backgroundColor: "#FFF",
     fontSize: 16,
-    width: '98%',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
   },
-  headerText: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 18,
-    textAlign: 'center',
+  sectionHeader: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 10,
   },
-  categoryContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  category: {
-    borderWidth: 2,
+
+  // Slider Styles
+  sliderContainer: { marginBottom: 20 },
+  sliderItem: {
+    width: width * 0.8,
+    marginRight: 15,
+    backgroundColor: "#FFF",
     borderRadius: 10,
-    padding: 14,
-    backgroundColor: '#F5F5DC',
-    alignItems: 'center',
-    width: '48%', // Adjusting width for better spacing
-    marginBottom: 15, // Adding space between categories
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  categoryText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#432E54',
-    textAlign: 'center',
-  },
-  productContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  productImage: {
-    width: '100%',
+  sliderImage: {
+    width: "100%",
     height: 150,
-    resizeMode: 'cover',
-    borderRadius: 10,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+    resizeMode: "cover",
   },
-  ProductMainTitle: {
+  sliderTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginTop: 5,
+    fontWeight: "600",
+    color: "#333",
+    padding: 10,
+  },
+
+  // Category Styles
+  categoryContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+  categoryCard: {
+    width: "48%",
+    backgroundColor: "#FFF",
+    borderRadius: 10,
+    marginBottom: 15,
+    alignItems: "center",
+    overflow: "hidden",
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  categoryImage: {
+    width: "100%",
+    height: 100,
+    resizeMode: "cover",
+  },
+  categoryTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginVertical: 8,
+    color: "#333",
+  },
+
+  // Product Styles
+  productContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    marginTop: 10,
   },
   product: {
-    width: '48%',
-    backgroundColor: '#FFF',
+    width: "48%",
+    backgroundColor: "#FFF",
     borderRadius: 10,
     padding: 10,
     marginBottom: 15,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
-    shadowRadius: 3,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  dotStyle: {
-    width: 10,
-    height: 10,
+  productImage: { width: "100%", height: 150, borderRadius: 10 },
+  productTitle: { fontSize: 14, fontWeight: "600", marginTop: 5 },
+  addButton: {
+    marginTop: 10,
+    backgroundColor: "#28a745",
+    padding: 10,
     borderRadius: 5,
-    marginHorizontal: -5,
+    alignItems: "center",
   },
+  addButtonText: { color: "#FFF", fontSize: 14, fontWeight: "bold" },
 });

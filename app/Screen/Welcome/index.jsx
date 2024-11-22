@@ -1,28 +1,40 @@
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 import React from "react";
-import { Text, View, TouchableOpacity, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
-
-const ButtonWork = () => {
+import { AuthContext } from "../../context/AuthProvider";
+import ButtonWork from "../../components/button";
+const Index = () => {
   const router = useRouter();
+  const { user } = React.useContext(AuthContext);
+
   return (
-    <View style={styles.container}>
-      <TouchableOpacity
-        style={styles.button1}
-        onPress={() => router.push("/Screen/singin/")}
-      >
-        <Text style={styles.buttonText}>Sign In</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.button2}
-        onPress={() => router.push("/Screen/singup/")}
-      >
-        <Text style={styles.buttonText}>Sign Up</Text>
-      </TouchableOpacity>
+    <View style={styles.wrapper}>
+      <Text style={styles.maintitle}>HamroShop</Text>
+      <Text>{user}</Text>
+      {user == null ? (
+        <View style={styles.container}>
+          <ButtonWork />
+        </View>
+      ) : (
+        <TouchableOpacity
+          style={styles.button1}
+          onPress={() => router.push("/(tabs)/")}
+        >
+          <Text style={styles.buttonText}>Go TO Home Page</Text>
+          <ActivityIndicator />
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
 
-export default ButtonWork;
+export default Index;
 
 const styles = StyleSheet.create({
   wrapper: {

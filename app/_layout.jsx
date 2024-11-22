@@ -1,11 +1,15 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Stack } from "expo-router";
-import { AuthContext, AuthProvider } from "./context/AuthProvider";
-
+import { AuthProvider } from "./context/AuthProvider";
+import Toast from "react-native-toast-message";
+import { CartProvider } from "./context/CartProvode";
 const Layout = () => {
   return (
     <AuthProvider>
-      <RootNavigation />
+      <CartProvider>
+        <RootNavigation />
+        <Toast />
+      </CartProvider>
     </AuthProvider>
   );
 };
@@ -18,8 +22,8 @@ function RootNavigation() {
       }}
     >
       <>
-        <Stack.Screen name="signin/index" />
-        <Stack.Screen name="signup/index" />
+        <Stack.Screen name="Screen/singin/index" />
+        <Stack.Screen name="Screen/singup/index" />
       </>
       <>
         <Stack.Screen name="(tabs)/_layout" options={{ headerShown: false }} />

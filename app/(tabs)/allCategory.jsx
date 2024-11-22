@@ -1,45 +1,54 @@
-import { View, Text, StyleSheet, ImageBackground, SafeAreaView, ScrollView ,Pressable, TouchableOpacity} from 'react-native';
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useRouter, Link } from 'expo-router';
-import { useNavigation } from 'expo-router';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Link } from "expo-router";
 
 const AllCategory = () => {
   const [data, setData] = useState([]);
-  const router = useRouter()
-  const navigation = useNavigation();
 
-  
   useEffect(() => {
     axios
-      .get('https://backend.nepalgadgetstore.com/category')
+      .get("https://backend.nepalgadgetstore.com/category")
       .then((response) => {
         setData(response.data);
       })
       .catch((error) => {
-        console.error('Error fetching data:', error);
+        console.error("Error fetching data:", error);
       });
   }, []);
 
   return (
     <SafeAreaView style={styles.wrapper}>
       <View style={styles.container}>
-        <Text style={styles.headerText}>Categories</Text>
+        <Text style={styles.headerText}>All Categories</Text>
         <ScrollView>
-          <View style={styles.imagesContainer}>
+          <View style={styles.cardsContainer}>
             {data.map((item) => (
-              <View style={styles.image} key={item.id}>
-                <Link href={`/SingleCategory/${item.id}`} asChild>
-                <TouchableOpacity>
-                <ImageBackground
-                  source={{ uri: `https://backend.nepalgadgetstore.com/${item.category_img}` }}
-                  style={styles.productImage}
-                >
-                  <Text style={styles.ProductMaintitle}>{item.category_name}</Text>
-                </ImageBackground>
-                </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.card}
+                key={item.id}
+                activeOpacity={0.8}
+              >
+                <Link href={`/Screen/SingleCategory/${item.id}`} asChild>
+                  <View>
+                    <Image
+                      source={{
+                        uri: `https://backend.nepalgadgetstore.com/${item.category_img}`,
+                      }}
+                      style={styles.cardImage}
+                    />
+                    <Text style={styles.cardTitle}>{item.category_name}</Text>
+                  </View>
                 </Link>
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
         </ScrollView>
@@ -53,59 +62,50 @@ export default AllCategory;
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
-    backgroundColor: '#f4f4f4',
+    backgroundColor: "#f8f9fa", // Light background
   },
   container: {
-    paddingHorizontal: 15,
+    paddingHorizontal: 20,
     paddingVertical: 10,
-    marginTop: 10,
-    marginBottom: 40,
   },
   headerText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontSize: 26,
+    fontWeight: "700",
+    color: "#333",
+    textAlign: "center",
     marginBottom: 20,
-    color: '#333',
   },
-  imagesContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: 10,
+  cardsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    gap: 15,
   },
-  image: {
-    width: '48%', 
-    marginBottom: 20,
-    borderRadius: 10,
-    overflow: 'hidden',
-    shadowColor: '#493628',
-    shadowOffset: { width: 10, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 20,
-    elevation: 10,
-    backgroundColor: 'white',
+  card: {
+    width: "48%",
+    backgroundColor: "#ffffff",
+    borderRadius: 12,
+    overflow: "hidden",
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    marginBottom: 15,
   },
-  productImage: {
-    width: '100%',
-    height: 150,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 10,
-    overflow: 'hidden',
+  cardImage: {
+    width: "100%",
+    height: 120,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+    resizeMode: "cover",
   },
-  ProductMaintitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: 'white',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 5,
-    position: 'absolute',
-    bottom: 10,
-    left: 0,
-    right: 0,
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    textAlign: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 5,
   },
 });
